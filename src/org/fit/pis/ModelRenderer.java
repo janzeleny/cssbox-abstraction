@@ -3,6 +3,7 @@ package org.fit.pis;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -17,37 +18,24 @@ import org.fit.cssbox.layout.ElementBox;
 import org.fit.cssbox.layout.ReplacedBox;
 import org.fit.cssbox.layout.TextBox;
 import org.fit.cssbox.render.BoxRenderer;
+import org.fit.cssbox.render.GraphicsRenderer;
 
 import cz.vutbr.web.css.CSSProperty.TextDecoration;
 
-public class ModelRenderer implements BoxRenderer {
+public class ModelRenderer extends GraphicsRenderer implements BoxRenderer {
 //    private final ElementBox root;
 
     private final BufferedImage img;
-    private final Graphics2D g;
+//    private final Graphics2D g;
 
 //    private final Color bgColor;
 
     public static final double SIMILARITY_THRESHOLD = 7.5;
 
     public ModelRenderer(BufferedImage img, Graphics2D g) {
+        super(g);
         this.img = img;
-        this.g = g;
-//    public ModelRenderer(ElementBox root, int width, int height, Color bg) {
-//        this.root = root;
-//        this.img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-//        this.g = this.img.createGraphics();
-//        this.bgColor = bg;
-    }
-
-    @Override
-    public void startElementContents(ElementBox elem) {
-        /* We don't need this one */
-    }
-
-    @Override
-    public void finishElementContents(ElementBox elem) {
-        /* We don't need this one */
+//        this.g = g;
     }
 
     @Override
@@ -55,15 +43,24 @@ public class ModelRenderer implements BoxRenderer {
         Rectangle rect;
         Color c;
 
+        AffineTransform origAt = null;
+        AffineTransform at = this.createTransform(box);
+        if (at != null) {
+            origAt = this.g.getTransform();
+            this.g.transform(at);
+        }
+
         rect = box.getAbsoluteBackgroundBounds(); // background is bounded by content and padding
 
         c = this.getBgColor(box);
-        if (c != null)
-        {
-
+        if (c != null) {
             this.g.setColor(c);
             this.g.drawRect(rect.x, rect.y, rect.width, rect.height);
             this.g.fillRect(rect.x, rect.y, rect.width, rect.height);
+        }
+
+        if (origAt != null) {
+            this.g.setTransform(origAt);
         }
     }
 
@@ -202,6 +199,15 @@ public class ModelRenderer implements BoxRenderer {
         Rectangle pos = ((Box)box).getAbsoluteContentBounds();
         ContentImage imgObj = (ContentImage)box.getContentObj();
 
+        AffineTransform origAt = null;
+        if (box instanceof ElementBox) {
+            AffineTransform at = this.createTransform((ElementBox) box);
+            if (at != null) {
+                origAt = this.g.getTransform();
+                this.g.transform(at);
+            }
+        }
+
         try {
             avg = new AverageColor(imgObj.getBufferedImage());
         } catch (IllegalArgumentException e) {
@@ -213,6 +219,10 @@ public class ModelRenderer implements BoxRenderer {
 
         this.g.drawRect(pos.x, pos.y, pos.width, pos.height);
         this.g.fillRect(pos.x, pos.y, pos.width, pos.height);
+
+        if (origAt != null) {
+            this.g.setTransform(origAt);
+        }
     }
 
     @Override
