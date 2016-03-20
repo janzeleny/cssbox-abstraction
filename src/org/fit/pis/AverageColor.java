@@ -67,6 +67,10 @@ public class AverageColor
         float fgPart = this.coloredPortion;
         float bgPart = 1-fgPart;
 
+        if (bg == null) {
+            return new Color(this.color.getRGB());
+        }
+
         r = (int)(this.color.getRed()*fgPart+bg.getRed()*bgPart);
         g = (int)(this.color.getGreen()*fgPart+bg.getGreen()*bgPart);
         b = (int)(this.color.getBlue()*fgPart+bg.getBlue()*bgPart);
