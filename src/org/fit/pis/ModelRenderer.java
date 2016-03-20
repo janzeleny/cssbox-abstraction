@@ -65,8 +65,6 @@ public class ModelRenderer implements BoxRenderer {
             this.g.drawRect(rect.x, rect.y, rect.width, rect.height);
             this.g.fillRect(rect.x, rect.y, rect.width, rect.height);
         }
-//        this.g.setColor(Color.red);
-//        this.g.drawRect(rect.x, rect.y, rect.width, rect.height);
     }
 
     private Color getBgColor(ElementBox box)
